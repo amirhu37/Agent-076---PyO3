@@ -1,0 +1,22 @@
+[package]
+name = "my-society"
+version = "0.1.0"
+edition = "2021"
+authors = ["nemo"]
+
+[lib]
+name = 'society'
+proc-macro = false
+crate-type = [ "cdylib"]
+# "rlib" ,
+[dependencies]
+# syn = "1.0"
+# quote = "1.0"
+derive_more = { version = "0.99.18", features = ["display", "default"] }
+rand = "0.8.5"
+pyo3 = { version = ">=0.16.0", features = ["extension-module", "auto-initialize"] }
+numpy = { version = "0.18.0" }
+ndarray = "0.15.6"
+ndarray-rand = "0.14"
+# , "auto-initialize"
+num = "0.4"
