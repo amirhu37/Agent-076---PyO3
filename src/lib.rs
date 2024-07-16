@@ -2,7 +2,7 @@ use exceptions::IDValueError;
 use numpy::PyArray2;
 use pyo3::prelude::*;
 
-// Declare the modules (assuming you have them in separate files)
+// Declare the modules
 pub mod agent;
 pub mod env;
 pub mod exceptions;
@@ -20,8 +20,13 @@ pub fn np_zeros(r: u8, c: u8, is_fortran: bool) -> Np2darray {
     })
 }
 
-
-
+pub fn datatype<T>(_: &T) -> &str {
+    let rtn: &str = std::any::type_name::<T>();
+    // let mut e: Vec<&str> = rtn.split("::").collect::<Vec<&str>>();
+    // e.reverse();
+    // e[0]
+    rtn
+}
 
 #[pymodule]
 #[pyo3(name = "society")]

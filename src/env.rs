@@ -1,68 +1,112 @@
-use pyo3::{prelude::*, types::PyDict};
-// use pyo3::wrap_pyfunction;
-// use derive_more::Display;
-// use std::collections::HashMap;
-// use pyo3::types::PyString;
-// //
-// use Python::with_gil as gil;
+use std::sync::atomic::{AtomicU16, Ordering};
+
+use pyo3::{
+    exceptions::PyValueError,
+    prelude::*,
+    types::{IntoPyDict, PyDict},
+};
+static COUNTER: AtomicU16 = AtomicU16::new(1);
 
 #[allow(dead_code)]
 #[derive(Debug)]
-#[pyclass(name = "Env", set_all)]
+#[pyclass(name = "Env", set_all, subclass, get_all, dict, sequence, unsendable)]
+#[pyo3(
+    text_signature = "( name : str, action_space : list[int] | np.ndarray, observation_space : np.ndarra)"
+)]
 pub struct Env {
-    id: usize,
+    id: u16,
     name: String,
-    action_space: Vec<usize>,
-    observation_space: Vec<f64>,
-    state: Option<f64>,
+    action_space: PyObject,
+    observation_space: PyObject,
 }
 
 #[pymethods]
 impl Env {
     #[new]
-    #[pyo3(signature = (id, name, action_space, observation_space, state))]
-    pub fn new(
-        id: Option<usize>,
+    #[pyo3(signature = ( name, action_space, observation_space))]
+    pub fn new<'py>(
         name: String,
-        action_space: Vec<usize>,
-        observation_space: Vec<f64>,
-        state: Option<f64>,
+        action_space: PyObject,
+        observation_space: PyObject,
     ) -> PyResult<Self> {
-        Ok(Env {
-            id: id.unwrap_or_default(),
+        let current: u16 = COUNTER.load(Ordering::SeqCst).into();
+        COUNTER.fetch_add(1, Ordering::SeqCst);
+
+        let ac_type: String = _py_run_as_string(&action_space, "type(value)");
+        let ob_type: String = _py_run_as_string(&observation_space, "type(value)");
+
+        let ac: Py<PyAny> = match ac_type.as_str() {
+            "<class 'list'>" => action_space,
+            "<class 'numpy.ndarray'>" => action_space,
+
+            _ => {
+                return Err(PyErr::new::<PyValueError, _>(format!(
+                    "Invalid type of action space type {}, Only `list` or `numpy.ndarray`",
+                    ac_type
+                )))
+            }
+        };
+        let env_space: Py<PyAny> = match ob_type.as_str() {
+            "<class 'numpy.ndarray'>" => observation_space,
+            _ => {
+                return Err(PyErr::new::<PyValueError, _>(format!(
+                    "Invalid type of env space {} , only `numpy.ndarray` is acceptable",
+                    ob_type
+                )))
+            }
+        };
+        Ok(Self {
+            id: current,
             name,
-            action_space,
-            observation_space,
-            state,
+            action_space: ac,
+            observation_space: env_space,
         })
     }
 
     pub fn reset(&mut self) {}
-
+    ///# step
+    /// ## input
+    /// #### state
+    /// #### action
+    /// ## output
+    /// ####   reward
+    /// ####    done
+    #[pyo3(text_signature = "($cls, _state, _action)")]
     pub fn step<'py>(
         &mut self,
         py: Python<'py>,
+        _state: PyObject,
         _action: u8,
-    ) -> PyResult<(f64, f64, bool, &'py PyDict)> {
-        // Implement your step logic here
-        let info = PyDict::new(py);
-        // You can populate the info dictionary with key-value pairs if needed
-        Ok((0.0, 0.0, false, info))
+    ) -> PyResult<(PyObject, bool, &'py PyDict)> {
+        let reward = 0.0.to_object(py);
+        let info: &PyDict = PyDict::new(py);
+        let done: bool = false;
+
+        Ok((reward, done, info))
     }
 
     pub fn close(&mut self) {}
 
     fn __str__(&self) -> String {
-        format!("Env (name: {})", self.name)
+        // let observation_space = self.observation_space.clone();
+        let observation_space_size = _py_run_as_string(&self.observation_space, "np.shape(value)");
+        let action_space_size = _py_run_as_string(&self.action_space, "np.shape(value)");
+
+        format!(
+            "Env(name: {}, action space size : {}, envirnment shape {})",
+            self.name, action_space_size, observation_space_size
+        )
     }
     fn __repr__(&self) {
         self.__str__();
     }
 }
 
-// #[pymodule]
-// #[pyo3(name = "py_env")]
-// fn py_env(_py: Python, m: &PyModule) -> PyResult<()> {
-//     m.add_class::<Env>()?;
-//     Ok(())
-// }
+pub fn _py_run_as_string(value: &PyObject, command: &str) -> String {
+    let var = Python::with_gil(|py| {
+        let locals = [("value", value)].into_py_dict(py);
+        let c = py.eval(command, None, Some(locals)).unwrap().to_string();
+        c
+    });
+    var
+}

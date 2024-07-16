@@ -1,37 +1,97 @@
-from society import society
+# from society import society
 import numpy as np
 from society import Agent, Env
+from tools import timeit, memory
 
-env1 = Env(name="matrix",action_space= np.arange(10),observation_space= np.random.randint(1,10 , (10,10)) , id = 1 , state = 12.)
-print(env1)
 
-ag1 = Agent( name = "neo0", 
-                    actions = np.arange(10)  ,
-                    utility = 0.1
-                    )
 
-ag2 = Agent( "smith", [1,2]  , 0.1)
 
-# ag3 = society.Agent( "morphius", [1,2] )
+
+def callback(action):
+    reward = 0
+    if action == 1:
+        reward += 0.55
+    elif action == 0:
+        reward += 0.45
+    elif action == 2:
+        reward -= 0.55
+    else:
+        reward += 0.5
+    return reward
+
+
+class Matrix(Env):
+    def __init__(self, name, action_space , observation_space) -> None:
+        # Call the superclass constructor
+        super().__init__()
+        # super().__init__(name, action_space, observation_space)
+
+        pass
+
+    def step(self, state: np.ndarray, action: int) -> tuple:
+        # reward, done, info = super().step(state, action)
+        reward = callback(action)
+        return reward+1, True, {"some": 0}
+    
+    def reset(self):
+        return super().reset()
+    def close(self) -> None:
+        return super().close()
+                 
+
+
+
+
+
+
 
 class Nemo(Agent):
-    def __init__(self, name, actions, utility):
-        Agent.__init__(self)
+    def __init__(self, name, actions, utility = 0):
+        super().__init__()
         pass
-    def rule(self, observ):
-        Agent.rule(self)
-        pass
+    def policy(self, observ):
+        p = observ / observ.sum()
         
+        return np.random.choice(self.actions, )
 
-ag3 = Nemo("nemo", [1,2], 0.0)
-print( 
-type(ag1.actions), 
-type(ag2.actions), 
-type(ag3.actions),
-type(ag1.actions), type(ag1.actions) ,  
- type(ag1.utility), ag1.utility
-,sep="\n")
+    def Returns(self) :
+        return super().Returns()
 
 
-for i in range(10):
-    print(ag1.rule(env1))
+
+
+env1_ = Env(name="matrix",
+            action_space= np.arange(10),
+            observation_space= np.random.randint(1,10 , (10,100)) )
+
+# print(env1_.observation_space)
+
+
+
+env1 = Matrix(name="matrix",
+           action_space= np.arange(10),
+           observation_space = np.random.randint(1,10 , (10,100)) 
+           )
+agent = Nemo("nemo", np.arange(5) )
+
+
+
+
+print(env1,
+      agent
+            
+, sep="\n")
+
+
+@memory
+@timeit
+def main():
+    for episode in range(500):
+        for step in env1.observation_space:
+            action = agent.policy(step)
+            reward, _done,info = env1.step(step, action)
+            agent.utility += reward
+
+
+main()
+print(agent.utility)

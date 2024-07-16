@@ -1,6 +1,6 @@
 # society.pyi
 
-from typing import List, Optional, Any
+from typing import List, Any
 import numpy as np
 
 class IDValueError(Exception):
@@ -8,22 +8,24 @@ class IDValueError(Exception):
     
 class Agent:
     """Represents an agent with specific attributes."""
-    # id: int
     name: str
     actions: np.ndarray | List[int] | np.ndarray 
     utility: float
     
-    def __init__(self, name: str, actions: List[int] | np.ndarray = [],  utility: float = 0.0) -> None:
+    def __init__(self, 
+                 name: str, 
+                 actions: List[int] | np.ndarray = [],  
+                 utility: float = 0.0) -> None:
         """
         Initializes a new Agent.
         
-        :param name: The name of the agent.
-        :param actions: A list of action IDs.
-        :param utility: The utility value of the agent.
-        :param id: The unique ID of the agent.
+        name: The name of the agent.
+        actions: A list of action IDs.
+        utility: The utility value of the agent.
+        id: The unique ID of the agent.
         """
         ...
-    def rule(self, observation) -> Any:...
+    def rule(self) -> Any:...
     def Returns(self) -> Any:...
     def __str__(self) -> str:...
     def __repr__(self) -> str:...
@@ -46,28 +48,24 @@ class Env:
     observation_space: np.ndarray
     state: float
     
-    def __init__(self, *, name: str, 
+    def __init__(self, 
+                name: str, 
                 action_space: np.ndarray | list[int], 
                 observation_space: np.ndarray,
+                utility: float = 0.0
                  ) -> None:
         """
         Initializes a new Agent.
         
-        :param name: The name of the agent.
-        :param actions: A list of action IDs.
-        :param state_action: A list of lists representing state-action values.
-        :param utility: The utility value of the agent.
-        :param id: The unique ID of the agent.
+        name: The name of the agent.
+        actions: A list of action IDs.
+        state_action: A list of lists representing state-action values.
+        utility: The utility value of the agent.
+        id: The unique ID of the agent.
         """
         ...
     @property
-    def get_actions(self) -> np.ndarray:
-        """
-        Gets the actions as a NumPy array.
-        
-        :return: A NumPy array of action IDs.
-        """
-        ...
+    def get_actions(self) -> np.ndarray:...
     def reset(self):...
     def step(self, action: int) -> tuple[np.ndarray, float, bool, dict]:...
     def close(self) -> None:...

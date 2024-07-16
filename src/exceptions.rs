@@ -1,4 +1,3 @@
-
 use pyo3::exceptions::PyException;
 use pyo3::prelude::*;
 use std::fmt;

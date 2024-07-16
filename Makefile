@@ -3,13 +3,15 @@ build:
 
 develop:
 	maturin develop
-	python tests/test.py 
+	
 
 fmt:
 	cargo fmt
 
-run:
-	cargo run
+debug:
+	maturin develop
+	python tests/test.py 
+
 
 test:
 	python tests/test.py 

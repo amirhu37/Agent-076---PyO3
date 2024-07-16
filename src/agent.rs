@@ -1,20 +1,12 @@
-
 // use ndarray::Array0;
-use pyo3::prelude::*;
+use pyo3::{exceptions::PyValueError, prelude::*, types::IntoPyDict};
 // use pyo3::types::PyList;
 use std::sync::atomic::{AtomicU16, Ordering};
+
+use crate::env::_py_run_as_string;
+
 // Atomic counter for generating unique IDs
 static COUNTER: AtomicU16 = AtomicU16::new(1);
-// use pyo3::types::PyAny;
-// use pyo3::wrap_pyfunction;
-// use numpy::PyArray1;
-// use numpy::ToPyArray;
-// use numpy::IntoPyArray;
-
-
-
-
-
 /// Creates a new agent.
 ///
 /// # Arguments
@@ -22,15 +14,14 @@ static COUNTER: AtomicU16 = AtomicU16::new(1);
 /// * `name` - A string slice that holds the name of the agent.
 /// * `actions` - A vector of unsigned 16-bit integers representing actions.
 /// * `utility` - A 64-bit floating point number representing the utility of the agent.
-/// # Returns 
+/// # Returns
 ///     Object of Agent
 /// *          `id` - An optional 16-bit unsigned integer representing the ID of the agent.
 /// Represents an agent with specific attributes.
-// #[derive(Debug, Clone)]
-#[pyclass(name = "Agent", unsendable, subclass, sequence)]
-#[pyo3(text_signature = "(name, actions ,  utility = 0.0)" , dict) ]
+#[pyclass(name = "Agent", unsendable, subclass, sequence, dict)]
+#[pyo3(text_signature = "(name, actions ,  utility = 0.0)")]
 pub struct Agent {
-    #[pyo3(get, set)]
+    #[pyo3(get, set, name = "id")]
     id: u16,
     #[pyo3(get, set)]
     name: String,
@@ -43,45 +34,52 @@ pub struct Agent {
 #[pymethods]
 impl Agent {
     #[new]
-    pub fn new<'py>(name: String, actions: PyObject, utility: Option<f64>) -> PyResult<Self> {
+    pub fn new<'py>(
+            name: String, 
+            actions: PyObject, 
+            utility: Option<f64>) -> PyResult<Self> {
         let current: u16 = COUNTER.load(Ordering::SeqCst).into();
         COUNTER.fetch_add(1, Ordering::SeqCst);
 
-        // let actions_vec  = match actions {        };
-            // return Err(pyo3::exceptions::PyValueError::new_err("Expected a numpy array or list"));
-        // };
-
-        let obj = Self {
+        let types: String = _py_run_as_string(&actions, "type(value)");
+        //  let __dict__ = locals;
+        let ac: Py<PyAny> = match types.as_str() {
+            "<class 'list'>" => actions,
+            "<class 'tuple'>" => actions,
+            "<class 'numpy.ndarray'>" => actions,
+            "<class 'set'>" => actions,
+            _ => {
+                return Err(PyErr::new::<PyValueError, _>(format!(
+                    "Invalid type of actions {}",
+                    types
+                )))
+            }
+        };
+        Ok(Self {
             id: current,
             name,
-            actions,
+            actions: ac,
             utility: utility.unwrap_or(0.0),
-        };
-
-        Ok(obj)
+        })
     }
-
-
-
-
-    fn rule(&mut self, _observation: f64)-> PyObject {
-        // Python::with_gil(|py| {None.to_object(py)} )
-        todo!()
+    #[pyo3(text_signature = "($cls, _action, _observation)")]
+    fn policy(&mut self, _action: PyObject, _observation: f64) -> Option<PyObject> {
+        None
     }
-
-    fn returns(&self)->PyObject{todo!()}
-
+    #[pyo3(text_signature = "($cls, _dicount_factor, _reward)")]
+    fn returns(&self, _dicount_factor: f32, _reward: f32) -> Option<PyObject> {
+        None
+    }
     fn __str__(&self) -> String {
         format!(
-            "Agent(Id: {}, Name: {}, Actions: {:?}, Utility: {:?})",
-            self.id, self.name, self.actions,  self.utility
+            "Agent(Id: {}, Name: {}, Actions: {}, Utility: {:?})",
+            self.id, self.name, self.actions, self.utility
         )
     }
 
     fn __repr__(&self) {
         self.__str__();
     }
-
 }
 
 //  : Python::with_gil(|py|{ actions.to_object(py).extract(py).unwrap() }),
