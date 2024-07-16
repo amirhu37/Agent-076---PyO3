@@ -10,12 +10,12 @@ class Agent:
     """Represents an agent with specific attributes."""
     name: str
     actions: np.ndarray | List[int] | np.ndarray 
-    utility: float
+    utility: List[int] | np.ndarray
     
     def __init__(self, 
                  name: str, 
-                 actions: List[int] | np.ndarray = [],  
-                 utility: float = 0.0) -> None:
+                 actions: List[int] | np.ndarray,  
+                 utility: List[int] | np.ndarray) -> None:
         """
         Initializes a new Agent.
         
@@ -46,13 +46,11 @@ class Env:
     name: str
     action_space: np.ndarray | list[int]
     observation_space: np.ndarray
-    state: float
     
     def __init__(self, 
                 name: str, 
                 action_space: np.ndarray | list[int], 
                 observation_space: np.ndarray,
-                utility: float = 0.0
                  ) -> None:
         """
         Initializes a new Agent.
