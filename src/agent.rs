@@ -3,7 +3,7 @@ use pyo3::{exceptions::PyValueError, prelude::*};
 // use pyo3::types::PyList;
 use std::sync::atomic::{AtomicU16, Ordering};
 
-use crate::env::_py_run_as_string;
+use crate::_py_run_as_string;
 
 // Atomic counter for generating unique IDs
 static COUNTER: AtomicU16 = AtomicU16::new(1);
@@ -45,12 +45,11 @@ impl Agent {
         let action_types: String = _py_run_as_string(&actions, "type(value)");
         let utility_types: String = _py_run_as_string(&actions, "type(value)");
 
-        //  let __dict__ = locals;
         let ac: Py<PyAny> = match action_types.as_str() {
+            "<class 'set'>" => actions,
             "<class 'list'>" => actions,
             "<class 'tuple'>" => actions,
             "<class 'numpy.ndarray'>" => actions,
-            "<class 'set'>" => actions,
             _ => {
                 return Err(PyErr::new::<PyValueError, _>(format!(
                     "Invalid type of actions {}",
@@ -75,7 +74,9 @@ impl Agent {
             utility: ut,
         })
     }
-    #[pyo3(text_signature = "($cls, _action : int | np.u16 )")]
+
+
+    #[pyo3(text_signature = "($cls, _action : int | np.u16 )")]    
     fn policy(&mut self, _action: PyObject) -> Option<PyObject> {
         None
     }

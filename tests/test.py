@@ -75,6 +75,9 @@ env1 = Matrix(name="matrix",
 
 agent_action =  np.arange(5)
 
+print("Z :", 
+    type(agent_action).__name__
+)
 
 print(
     env1.observation_space.shape,

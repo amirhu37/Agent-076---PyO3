@@ -3,8 +3,10 @@ use std::sync::atomic::{AtomicU16, Ordering};
 use pyo3::{
     exceptions::PyValueError,
     prelude::*,
-    types::{IntoPyDict, PyDict},
+    types::PyDict,
 };
+
+use crate::_py_run_as_string;
 static COUNTER: AtomicU16 = AtomicU16::new(1);
 
 #[allow(dead_code)]
@@ -102,11 +104,3 @@ impl Env {
     }
 }
 
-pub fn _py_run_as_string(value: &PyObject, command: &str) -> String {
-    let var = Python::with_gil(|py| {
-        let locals = [("value", value)].into_py_dict(py);
-        let c = py.eval(command, None, Some(locals)).unwrap().to_string();
-        c
-    });
-    var
-}

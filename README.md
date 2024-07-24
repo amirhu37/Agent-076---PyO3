@@ -12,7 +12,7 @@
 This file is part of the Multi-Agent-System Enviroment.
 for now it is base on state-action matrix. for next I have no Idea?!
 
-the whole project was a try to become a 'Rust Station'
+the whole project was a try to become a 'Rustaceant'
 
 
 

@@ -1,6 +1,7 @@
 use exceptions::IDValueError;
 use numpy::PyArray2;
-use pyo3::prelude::*;
+use pyo3::{prelude::*, types::IntoPyDict};
+
 
 // Declare the modules
 pub mod agent;
@@ -27,11 +28,20 @@ pub fn datatype<T>(_: &T) -> &str {
     // e[0]
     rtn
 }
+pub fn _py_run_as_string(value: &PyObject, command: &str) -> String {
+    let var = Python::with_gil(|py| {
+        let locals = [("value", value)].into_py_dict(py);
+        let c = py.eval(command, None, Some(locals)).unwrap().to_string();
+        c
+    });
+    var
+}
+
 
 #[pymodule]
 #[pyo3(name = "society")]
 pub fn society(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_class::<Agent>()?; // Add the Agent class
+    m.add_class::<Agent>()?; 
     m.add_class::<Env>()?;
     m.add_class::<IDValueError>()?;
     Ok(())
