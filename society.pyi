@@ -9,8 +9,8 @@ class IDValueError(Exception):
 class Agent:
     """Represents an agent with specific attributes."""
     name: str
-    actions: np.ndarray | List[int] | np.ndarray 
-    utility: List[int] | np.ndarray
+    # actions: np.ndarray | List[int] | np.ndarray 
+    # utility: List[int] | np.ndarray
     
     def __init__(self, 
                  name: str, 

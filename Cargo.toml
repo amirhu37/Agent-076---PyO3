@@ -12,10 +12,10 @@ crate-type = [ "cdylib"]
 [dependencies]
 # syn = "1.0"
 # quote = "1.0"
+pyo3 = { version = "0.21.0", features = ["extension-module", "auto-initialize"] }
 derive_more = { version = "0.99.18", features = ["display", "default"] }
 rand = "0.8.5"
-pyo3 = { version = ">=0.16.0", features = ["extension-module", "auto-initialize"] }
-numpy = { version = "0.18.0" }
+numpy = { version = "0.21.0" }
 ndarray = "0.15.6"
 ndarray-rand = "0.14"
 # , "auto-initialize"
