@@ -65,8 +65,8 @@ impl Agent {
     fn policy(_slf: &PyBound<Self>, _action: PyObject) -> Option<PyObject> {
         None
     }
-    #[pyo3(text_signature = "($cls, _dicount_factor : float, _reward : float)")]
-    fn returns(_slf: &PyBound<Self>, _dicount_factor: f32, _reward: f32) -> Option<PyObject> {
+    #[pyo3(text_signature = "($cls, _dicount_factor : float, _reward : Any)")]
+    fn returns(_slf: &PyBound<Self>, _dicount_factor: f32, _reward: PyBound<PyAny>) -> Option<PyObject> {
         None
     }
     fn __str__(slf: &PyBound<Self> , py : Python<'_>) -> String {
