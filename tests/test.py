@@ -11,17 +11,17 @@ def callback(action):
     reward = 0
     match action :
         case 1:
-            reward = 0.55
+            reward = np.array([0.55])
         case  0:
-            reward = 0.45
+            reward = np.array([0.45])
         case  2:
-            reward = 0.55
+            reward = np.array([0.55])
         case 3 :
-            reward = -.90
+            reward = np.array([-.90])
         case 4 :
-            reward = .358
+            reward = np.array([.358])
         case 5:
-            reward = .4
+            reward = np.array([.4])
     return reward
 
 
